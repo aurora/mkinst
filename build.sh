@@ -140,7 +140,9 @@ tail +$line "$0" \
     | sed -e "s;%%SUM%%;${check[0]};g" -e "s;%%SIZE%%;${check[1]};g" \
     | cat - <($custom) <(echo "exit") <(echo "#MARKER:PAYLOAD") $src > $dst
 
-chmod a+x $dst
+if [ -f "$dst" ]; then
+    chmod a+x "$dst"
+fi
 
 exit
 
