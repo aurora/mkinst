@@ -133,8 +133,7 @@ scheck=(%%SUM%% %%SIZE%%)
 pcheck=($(CMD_ENV=xpg4 cksum "$tmp"))
 
 if [ ${scheck[0]} -ne ${pcheck[0]} ] || [ ${scheck[1]} -ne ${pcheck[1]} ]; then
-    echo "the installer payload is corrupted."
-    echo "aborting"
+    echo "The installer payload is corrupted."
     exit 1
 fi
 
