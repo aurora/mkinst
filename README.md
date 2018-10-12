@@ -4,7 +4,7 @@ Tool for building self-contained installers.
 
 # Usage
 
-    usage: $(basename $0) [OPTIONS] [--] <source> <target>
+    usage: build.sh [OPTIONS] [--] <source> <target>
     
     Creates a self-contained installer from the specified source and stores it to
     the specified target.
