@@ -136,9 +136,14 @@ fi
 check=($(CMD_ENV=xpg4 cksum "$src"))
 line=$(($(grep -n "#""MARKER:INSTALLER" "$0" | head -n 1 | cut -d ":" -f 1) + 1))
 
+tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
+addtemp "$tmp"
+
 tail +$line "$0" \
     | sed -e "s;%%SUM%%;${check[0]};g" -e "s;%%SIZE%%;${check[1]};g" \
-    | cat - <($custom) <(echo "exit") <(echo "#MARKER:PAYLOAD") $src > $dst
+    | cat - <($custom) <(echo "exit") > "$tmp"
+
+sed -e "s;%%LINE%%;$(($(cat $tmp | wc -l) + 1));g" "$tmp" | cat - "$src" > "$dst"
 
 if [ -f "$dst" ]; then
     chmod a+x "$dst"
@@ -150,11 +155,9 @@ exit
 #!/usr/bin/env bash
 tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 
-trap 'rm -f ${tmp}; exit 1' HUP INT QUIT TERM
+trap 'rm -f ${tmp}; exit 1' EXIT HUP INT QUIT TERM
 
-line=$(($(grep -an "#""MARKER:PAYLOAD" "$0" | head -n 1  | cut -d ":" -f 1) + 1))
-
-tail +$line "$0" > $tmp
+tail +%%LINE%% "$0" > $tmp
 
 scheck=(%%SUM%% %%SIZE%%)
 pcheck=($(CMD_ENV=xpg4 cksum "$tmp"))
