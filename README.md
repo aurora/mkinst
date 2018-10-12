@@ -15,7 +15,7 @@ This tool can be used to create self-contained installers.
                             If the name of a directory is specified, the tool will
                             create a tar archive from it. If the source is no direc-
                             tory an additional custom installer script needs to be
-                            added using the options '-s' or '--script'.
+                            added using the options '-i' or '--include'.
 
         <target>            Either a file-name or '-' for stdout.
 
