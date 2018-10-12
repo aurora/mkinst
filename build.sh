@@ -41,8 +41,9 @@ OPTIONS
 
     -q, --quiet     Less verbose output.
     -s, --script    Additional custom installer script. This argument is
-                    required if the source is either a file or stdin. This
-                    argument is discarded if the source is a directory.
+                    required if the source is either a file or stdin. If
+                    the source is a directory this argument is optional
+                    and overwrites the default installer if specified.
     -h, --help      Display this usage information.
         --version   Show version and exit.
 "
@@ -111,17 +112,19 @@ else
     dst="$2"
 fi
 
+if [ "$custom" != "" ]; then
+    if [ ! -f "$custom" ] && [ ! -p "$custom" ]; then
+        log "Unable to acquire custom installer script."
+        exit 1
+    fi
+        
+    custom="cat "$custom""
+fi
+
 if [ "$1" = "-" ] || [ -f "$1" ]; then
     if [ "$custom" = "" ]; then
         showusage
         exit 1
-    else
-        if [ ! -f "$custom" ] && [ ! -p "$custom" ]; then
-            log "Unable to acquire custom installer script."
-            exit 1
-        fi
-        
-        custom="cat "$custom""
     fi
     
     if [ "$1" = "-" ]; then
@@ -138,7 +141,9 @@ elif [ -d "$1" ]; then
 
     tar cfz "$src" -C "$1" .
     
-    custom="echo tar xfz \$tmp"
+    if [ "$custom" = "" ]; then
+        custom="echo tar xfz \$tmp"
+    fi
 else 
     log "Unable to read from source."
     exit 1
