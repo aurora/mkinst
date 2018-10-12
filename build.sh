@@ -8,6 +8,7 @@
 version="0.0.1"
 custom=""
 verbose=true
+tempfiles=()
 
 function showusage {
     echo "usage: $(basename $0) [OPTIONS] [--] <source> <target>
@@ -41,6 +42,20 @@ function log {
         echo "$@" 1>&2
     fi
 }
+
+function addtemp {
+    tempfiles="$tempfiles $1"
+}
+
+function cleanup {
+    local $tempfile
+    
+    for tempfile in $tempfiles; do
+        rm "$tempfile";
+    done
+}
+
+trap 'cleanup' EXIT HUP INT QUIT TERM
 
 while [[ "${1:0:1}" = "-" ]]; do
     case $1 in
@@ -91,8 +106,7 @@ if [ "$1" = "-" ] || [ -f "$1" ]; then
     
     if [ "$1" = "-" ]; then
         src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
-    
-        trap 'rm -f ${src}; exit 1' HUP INT QUIT TERM
+        addtemp "$src"
     
         cat - > $src
     else
@@ -100,8 +114,8 @@ if [ "$1" = "-" ] || [ -f "$1" ]; then
     fi
 elif [ -d "$1" ]; then
     src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
+    addtemp "$src"
 
-    trap 'rm -f ${src}; exit 1' HUP INT QUIT TERM
     
     tar cfvz $src -C "$1" .
     
