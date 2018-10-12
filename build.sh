@@ -17,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 version="0.0.1"
-custom=""
+include=""
 verbose=true
 tempfiles=()
 
 function showusage {
     echo "usage: $(basename $0) [OPTIONS] [--] <source> <target>
-    
+
 Creates a self-contained installer from the specified source and stores it to
 the specified target.
 
@@ -40,10 +40,9 @@ ARGUMENTS
 OPTIONS
 
     -q, --quiet     Less verbose output.
-    -s, --script    Additional custom installer script. This argument is
-                    required if the source is either a file or stdin. If
-                    the source is a directory this argument is optional
-                    and overwrites the default installer if specified.
+    -i, --include   Additional custom installer script to include. This option
+                    is required if the source is either a file or stdin. It is
+                    optional if the source is a directory.
     -h, --help      Display this usage information.
         --version   Show version and exit.
 "
@@ -61,7 +60,7 @@ function addtemp {
 
 function cleanup {
     local $tempfile
-    
+
     for tempfile in $tempfiles; do
         rm "$tempfile";
     done
@@ -81,8 +80,8 @@ while [[ "${1:0:1}" = "-" ]]; do
         -q|--quiet)
             verbose=false
             ;;
-        -s|--script)
-            custom="$2"
+        -i|--include)
+            include="$2"
             shift
             ;;
         -h|-\?|--help)
@@ -94,7 +93,7 @@ while [[ "${1:0:1}" = "-" ]]; do
             exit 1
             ;;
     esac
-    
+
     shift
 done
 
@@ -112,25 +111,25 @@ else
     dst="$2"
 fi
 
-if [ "$custom" != "" ]; then
-    if [ ! -f "$custom" ] && [ ! -p "$custom" ]; then
+if [ "$include" != "" ]; then
+    if [ ! -f "$include" ] && [ ! -p "$include" ]; then
         log "Unable to acquire custom installer script."
         exit 1
     fi
-        
-    custom="cat "$custom""
+
+    include="cat "$include""
 fi
 
 if [ "$1" = "-" ] || [ -f "$1" ]; then
-    if [ "$custom" = "" ]; then
+    if [ "$include" = "" ]; then
         showusage
         exit 1
     fi
-    
+
     if [ "$1" = "-" ]; then
         src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
         addtemp "$src"
-    
+
         cat - > "$src"
     else
         src="$1"
@@ -140,11 +139,11 @@ elif [ -d "$1" ]; then
     addtemp "$src"
 
     tar cfz "$src" -C "$1" .
-    
-    if [ "$custom" = "" ]; then
-        custom="echo tar xfz \$tmp"
+
+    if [ "$include" = "" ]; then
+        include="echo tar xfz \$tmp"
     fi
-else 
+else
     log "Unable to read from source."
     exit 1
 fi
@@ -157,7 +156,7 @@ addtemp "$tmp"
 
 tail +$line "$0" \
     | sed -e "s;%%SUM%%;${check[0]};g" -e "s;%%SIZE%%;${check[1]};g" \
-    | cat - <($custom) <(echo "exit") > "$tmp"
+    | cat - <($include) <(echo "exit") > "$tmp"
 
 sed -e "s;%%LINE%%;$(($(cat $tmp | wc -l) + 1));g" "$tmp" | cat - "$src" > "$dst"
 
