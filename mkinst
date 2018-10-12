@@ -182,10 +182,10 @@ exit
 #!%%SHELL%%
 
 # Created using mkinst - https://github.com/aurora/mkinst/
-# This installation script is licensed as MIT, (c) 2018 by Harald Lapp.
+# This installation script is licensed unter the MIT, (c) 2018 by Harald Lapp.
 #
 # This does not apply to the software distributed with this script, which
-# is property of the respective owner.
+# is property of its respective owner.
 #
 tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 
