@@ -22,7 +22,7 @@ This tool can be used to create self-contained installers.
     OPTIONS
 
         -q, --quiet     Less verbose output.
-        -s, --shell     Shell to use for installer (default: $instshell).
+        -s, --shell     Shell to use for installer (default: /bin/sh).
                         Make sure that the shell is available on the target system.
                         The specified path should be a valid to use as shebang.
         -i, --include   Additional custom installer script to include. This option
