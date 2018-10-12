@@ -65,7 +65,7 @@ function addtemp {
 }
 
 function cleanup {
-    local $tempfile
+    local tempfile
 
     for tempfile in $tempfiles; do
         rm "$tempfile";
