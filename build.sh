@@ -11,15 +11,16 @@ custom=""
 function showusage {
     echo "usage: $(basename $0) [OPTIONS] [--] <source> <target>
     
-Creates a self-container installer from the specified source and stores it to
+Creates a self-contained installer from the specified source and stores it to
 the specified target.
 
 ARGUMENTS
 
     <source>    Expects a file-name, a directory name or '-' for stdin. If the
                 name of a directory is specified, the tool will create a tar 
-                archive from it. If the source is no directory, a additional
-                custom installer script needs to be added using the option 
+                archive from it. If the source is no directory an additional
+                custom installer script needs to be added using the options
+                '-s' or '--script'.
 
     <target>    Either a file-name or '-' for stdout.
 
@@ -27,7 +28,7 @@ OPTIONS
 
 -s, --script    Additional custom installer script. This argument is required
                 if the source is either a file or stdin. This argument is 
-                discared if the source is a directory.
+                discarded if the source is a directory.
 -h, --help      Display this usage information.
     --version   Show version and exit.
 "
@@ -70,7 +71,7 @@ if [ "$1" = "-" ] || [ -f "$1" ]; then
         exit 1
     else
         if [ ! -f "$custom" ] && [ ! -p "$custom" ]; then
-            echo "Custom installer script does not exist."
+            echo "Unable to acquire custom installer script."
             exit 1
         fi
         
