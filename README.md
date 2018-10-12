@@ -1,11 +1,11 @@
-# Preface
+# mkinst
 
-Tool for building self-contained installers.
+This tool can be used to create self-contained installers.
 
-# Usage
+## Usage
 
-    usage: build.sh [OPTIONS] [--] <source> <target>
-    
+    usage: mkinst [OPTIONS] [--] <source> <target>
+
     Creates a self-contained installer from the specified source and stores it to
     the specified target.
 
@@ -22,13 +22,16 @@ Tool for building self-contained installers.
     OPTIONS
 
         -q, --quiet     Less verbose output.
-        -s, --script    Additional custom installer script. This argument is
-                        required if the source is either a file or stdin. This
-                        argument is discarded if the source is a directory.
+        -s, --shell     Shell to use for installer (default: $instshell).
+                        Make sure that the shell is available on the target system.
+                        The specified path should be a valid to use as shebang.
+        -i, --include   Additional custom installer script to include. This option
+                        is required if the source is either a file or stdin. It is
+                        optional if the source is a directory.
         -h, --help      Display this usage information.
             --version   Show version and exit.
 
-# License
+## License
 
 *Note: while this script is distributed under the GPL-3 license, the generated
 installation script is distributed under the MIT license.*
