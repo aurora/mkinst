@@ -7,6 +7,7 @@
 
 version="0.0.1"
 custom=""
+verbose=true
 
 function showusage {
     echo "usage: $(basename $0) [OPTIONS] [--] <source> <target>
@@ -26,12 +27,19 @@ ARGUMENTS
 
 OPTIONS
 
+-q, --quiet     Omit error and status messages.
 -s, --script    Additional custom installer script. This argument is required
                 if the source is either a file or stdin. This argument is 
                 discarded if the source is a directory.
 -h, --help      Display this usage information.
     --version   Show version and exit.
 "
+}
+
+function log {
+    if [[ $verbose = true ]]; then
+        echo "$@" 1>&2
+    fi
 }
 
 while [[ "${1:0:1}" = "-" ]]; do
@@ -42,6 +50,9 @@ while [[ "${1:0:1}" = "-" ]]; do
         --)
             shift
             break
+            ;;
+        -q|--quiet)
+            verbose=false
             ;;
         -s|--script)
             custom="$2"
@@ -71,7 +82,7 @@ if [ "$1" = "-" ] || [ -f "$1" ]; then
         exit 1
     else
         if [ ! -f "$custom" ] && [ ! -p "$custom" ]; then
-            echo "Unable to acquire custom installer script."
+            log "Unable to acquire custom installer script."
             exit 1
         fi
         
@@ -96,14 +107,14 @@ elif [ -d "$1" ]; then
     
     custom="echo tar xfvz \$tmp"
 else 
-    echo "Unable to read from source."
+    log "Unable to read from source."
     exit 1
 fi
 
 if [ "$2" = "-" ]; then
     dst=/dev/stdout
 elif [ -e "$2" ]; then
-    echo "Target already exists."
+    log "Target already exists."
     exit 1
 else
     dst="$2"
@@ -134,7 +145,7 @@ scheck=(%%SUM%% %%SIZE%%)
 pcheck=($(CMD_ENV=xpg4 cksum "$tmp"))
 
 if [ ${scheck[0]} -ne ${pcheck[0]} ] || [ ${scheck[1]} -ne ${pcheck[1]} ]; then
-    echo "The installer payload is corrupted."
+    log "The installer payload is corrupted."
     exit 1
 fi
 
