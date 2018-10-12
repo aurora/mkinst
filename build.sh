@@ -18,6 +18,7 @@
 
 version="0.0.1"
 include=""
+instshell="/bin/sh"
 verbose=true
 tempfiles=()
 
@@ -40,6 +41,9 @@ ARGUMENTS
 OPTIONS
 
     -q, --quiet     Less verbose output.
+    -s, --shell     Shell to use for installer (default: $instshell).
+                    Make sure that the shell is available on the target system.
+                    The specified path should be a valid to use as shebang.
     -i, --include   Additional custom installer script to include. This option
                     is required if the source is either a file or stdin. It is
                     optional if the source is a directory.
@@ -82,6 +86,10 @@ while [[ "${1:0:1}" = "-" ]]; do
             ;;
         -i|--include)
             include="$2"
+            shift
+            ;;
+        -s|--shell)
+            instshell="$2"
             shift
             ;;
         -h|-\?|--help)
@@ -155,7 +163,9 @@ tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 addtemp "$tmp"
 
 tail +$line "$0" \
-    | sed -e "s;%%SUM%%;${check[0]};g" -e "s;%%SIZE%%;${check[1]};g" \
+    | sed -e "s;%%SUM%%;${check[0]};g" \
+        -e "s;%%SIZE%%;${check[1]};g" \
+        -e "s;%%SHELL%%;$instshell;g" \
     | cat - <($include) <(echo "exit") > "$tmp"
 
 sed -e "s;%%LINE%%;$(($(cat $tmp | wc -l) + 1));g" "$tmp" | cat - "$src" > "$dst"
@@ -167,7 +177,7 @@ fi
 exit
 
 #MARKER:INSTALLER
-#!/usr/bin/env bash
+#!%%SHELL%%
 tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 
 trap 'rm -f ${tmp}; exit 1' EXIT HUP INT QUIT TERM
