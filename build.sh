@@ -6,9 +6,6 @@
 #
 
 version="0.0.1"
-
-src="$1"
-dst=""
 custom=""
 
 function showusage {
