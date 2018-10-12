@@ -91,6 +91,15 @@ if [ "$2" = "" ]; then
     exit 1
 fi
 
+if [ "$2" = "-" ]; then
+    dst=/dev/stdout
+elif [ -e "$2" ]; then
+    log "Target already exists."
+    exit 1
+else
+    dst="$2"
+fi
+
 if [ "$1" = "-" ] || [ -f "$1" ]; then
     if [ "$custom" = "" ]; then
         showusage
@@ -123,15 +132,6 @@ elif [ -d "$1" ]; then
 else 
     log "Unable to read from source."
     exit 1
-fi
-
-if [ "$2" = "-" ]; then
-    dst=/dev/stdout
-elif [ -e "$2" ]; then
-    log "Target already exists."
-    exit 1
-else
-    dst="$2"
 fi
 
 check=($(CMD_ENV=xpg4 cksum "$src"))
