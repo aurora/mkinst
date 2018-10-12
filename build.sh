@@ -117,7 +117,7 @@ if [ "$1" = "-" ] || [ -f "$1" ]; then
         src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
         addtemp "$src"
     
-        cat - > $src
+        cat - > "$src"
     else
         src="$1"
     fi
