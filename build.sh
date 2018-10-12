@@ -125,10 +125,9 @@ elif [ -d "$1" ]; then
     src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
     addtemp "$src"
 
+    tar cfz "$src" -C "$1" .
     
-    tar cfvz $src -C "$1" .
-    
-    custom="echo tar xfvz \$tmp"
+    custom="echo tar xfz \$tmp"
 else 
     log "Unable to read from source."
     exit 1
