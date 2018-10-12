@@ -14,8 +14,8 @@ custom=/dev/null
 function showusage {
     echo "usage: $(basename $0) [OPTIONS] [--] <source> <target>
     
-Creates a self-container installer from the specified input and stores it to
-the specified output.
+Creates a self-container installer from the specified source and stores it to
+the specified target.
 
 ARGUMENTS
 
@@ -28,14 +28,13 @@ ARGUMENTS
 
 OPTIONS
 
--s, --script    Additional custom installer script This argument is required
+-s, --script    Additional custom installer script. This argument is required
                 if the source is either a file or stdin. This argument is 
                 discared if the source is a directory.
 -h, --help      Display this usage information.
     --version   Show version and exit.
 "
 }
-
 
 while [[ "${1:0:1}" = "-" ]]; do
     case $1 in
