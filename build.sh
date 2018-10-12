@@ -9,7 +9,7 @@ version="0.0.1"
 
 src="$1"
 dst=""
-custom=/dev/null
+custom=""
 
 function showusage {
     echo "usage: $(basename $0) [OPTIONS] [--] <source> <target>
@@ -46,11 +46,6 @@ while [[ "${1:0:1}" = "-" ]]; do
             break
             ;;
         -s|--script)
-            if [ -f "$2" ]; then
-                echo "Custom installer script does not exist."
-                exit 1
-            fi
-            
             custom="$2"
             shift
             ;;
@@ -72,20 +67,36 @@ if [ "$2" = "" ]; then
     exit 1
 fi
 
-if [ "$1" = "-" ]; then
-    src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
+if [ "$1" = "-" ] || [ -f "$1" ]; then
+    if [ "$custom" = "" ]; then
+        showusage
+        exit 1
+    else
+        if [ ! -f "$custom" ] && [ ! -p "$custom" ]; then
+            echo "Custom installer script does not exist."
+            exit 1
+        fi
+        
+        custom="cat "$custom""
+    fi
     
-    trap 'rm -f ${src}; exit 1' HUP INT QUIT TERM
+    if [ "$1" = "-" ]; then
+        src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
     
-    cat - > $src
+        trap 'rm -f ${src}; exit 1' HUP INT QUIT TERM
+    
+        cat - > $src
+    else
+        src="$1"
+    fi
 elif [ -d "$1" ]; then
-    exit 255    # not implemented, yet
-
     src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 
     trap 'rm -f ${src}; exit 1' HUP INT QUIT TERM
-elif [ -f "$1" ]; then
-    src="$1"
+    
+    tar cfvz $src -C "$1" .
+    
+    custom="echo tar xfvz \$tmp"
 else 
     echo "Unable to read from source."
     exit 1
@@ -105,7 +116,7 @@ line=$(($(grep -n "#""MARKER:INSTALLER" "$0" | head -n 1 | cut -d ":" -f 1) + 1)
 
 tail +$line "$0" \
     | sed -e "s;%%SUM%%;${check[0]};g" -e "s;%%SIZE%%;${check[1]};g" \
-    | cat - $custom <(echo "exit") <(echo "#MARKER:PAYLOAD") $src > $dst
+    | cat - <($custom) <(echo "exit") <(echo "#MARKER:PAYLOAD") $src > $dst
 
 chmod a+x $dst
 
@@ -117,7 +128,7 @@ tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 
 trap 'rm -f ${tmp}; exit 1' HUP INT QUIT TERM
 
-line=$(($(grep -n "#""MARKER:PAYLOAD" "$0" | head -n 1  | cut -d ":" -f 1) + 1))
+line=$(($(grep -an "#""MARKER:PAYLOAD" "$0" | head -n 1  | cut -d ":" -f 1) + 1))
 
 tail +$line "$0" > $tmp
 
@@ -129,3 +140,4 @@ if [ ${scheck[0]} -ne ${pcheck[0]} ] || [ ${scheck[1]} -ne ${pcheck[1]} ]; then
     echo "aborting"
     exit 1
 fi
+
