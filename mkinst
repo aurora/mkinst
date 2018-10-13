@@ -223,7 +223,7 @@ scheck=(%%SUM%% %%SIZE%%)
 pcheck=($(CMD_ENV=xpg4 cksum "$tmp"))
 
 if [ ${scheck[0]} -ne ${pcheck[0]} ] || [ ${scheck[1]} -ne ${pcheck[1]} ]; then
-    log "The installer is corrupted."
+    echo "The installer is corrupted." 1>&2
     exit 1
 fi
 
