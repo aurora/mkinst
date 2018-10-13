@@ -79,7 +79,7 @@ function cleanup {
     done
 }
 
-trap 'cleanup' EXIT HUP INT QUIT TERM
+trap 'code=$? ; cleanup ; exit $code' EXIT HUP INT QUIT TERM
 
 while [[ "${1:0:1}" = "-" ]]; do
     case $1 in
@@ -215,7 +215,7 @@ exit
 #
 tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 
-trap 'rm -f ${tmp}; exit 1' EXIT HUP INT QUIT TERM
+trap 'code=$? ; rm -f ${tmp} ; exit $code' EXIT HUP INT QUIT TERM
 
 %%EXTRACT%% > $tmp
 
