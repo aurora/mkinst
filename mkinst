@@ -22,6 +22,7 @@ version="0.0.1"
 include=""
 instshell="/bin/sh"
 verbose=true
+compress=6
 tempfiles=()
 
 function showusage {
@@ -50,6 +51,11 @@ OPTIONS
     -i, --include ARG   Additional custom installer script to include. This
                         option is required if the source is either a file or
                         stdin. It is optional if the source is a directory.
+    -c, --compress ARG  Compression level (default: $compress).
+                        Please see the gzip man pages for details. Additionally
+                        to the gzip compression levels the level 0 was added
+                        to specify that the payload should be distributed un-
+                        compressed.
     -h, --help          Display this usage information.
         --version       Show version and exit.
 "
@@ -86,6 +92,15 @@ while [[ "${1:0:1}" = "-" ]]; do
             ;;
         -q|--quiet)
             verbose=false
+            ;;
+        -c|--compress)
+            if ! [[ $2 =~ ^[0-9]$ ]] ; then
+               log "Invalid compression level."
+               exit 1
+            fi
+
+            compress=$2
+            shift
             ;;
         -i|--include)
             include="$2"
@@ -137,22 +152,26 @@ if [ "$1" = "-" ] || [ -f "$1" ]; then
         exit 1
     fi
 
-    if [ "$1" = "-" ]; then
-        src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
-        addtemp "$src"
+    src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
+    addtemp "$src"
 
-        cat - > "$src"
+    if [[ $compress -gt 0 ]]; then
+        cat "$1" | gzip -$compress > "$src"
     else
-        src="$1"
+        cat "$1" > "$src"
     fi
 elif [ -d "$1" ]; then
     src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
     addtemp "$src"
 
-    tar cfz "$src" -C "$1" .
+    if [[ $compress -gt 0 ]]; then
+        tar cf - -C "$1" . | gzip -$compress > "$src"
+    else
+        tar cf "$src" -C "$1" .
+    fi
 
     if [ "$include" = "" ]; then
-        include="echo tar xfz \$tmp"
+        include="echo tar xf \$tmp"
     fi
 else
     log "Unable to read from source."
@@ -171,7 +190,13 @@ tail +$line "$0" \
         -e "s;%%SHELL%%;$instshell;g" \
     | cat - <($include) <(echo "exit") > "$tmp"
 
-sed -e "s;%%LINE%%;$(($(cat $tmp | wc -l) + 1));g" "$tmp" | cat - "$src" > "$dst"
+extract="tail +$(($(cat $tmp | wc -l) + 1)) \$0"
+
+if [[ $compress -gt 0 ]]; then
+    extract="$extract | gunzip"
+fi
+
+sed -e "s;%%EXTRACT%%;$extract;g" "$tmp" | cat - "$src" > "$dst"
 
 if [ -f "$dst" ]; then
     chmod a+x "$dst"
@@ -192,7 +217,7 @@ tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 
 trap 'rm -f ${tmp}; exit 1' EXIT HUP INT QUIT TERM
 
-tail +%%LINE%% "$0" > $tmp
+%%EXTRACT%% > $tmp
 
 scheck=(%%SUM%% %%SIZE%%)
 pcheck=($(CMD_ENV=xpg4 cksum "$tmp"))
