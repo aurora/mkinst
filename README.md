@@ -29,6 +29,11 @@ This tool can be used to create self-contained installers.
         -i, --include ARG   Additional custom installer script to include. This
                             option is required if the source is either a file or
                             stdin. It is optional if the source is a directory.
+        -c, --compress ARG  Compression level (default: 6).
+                            Please see the gzip man pages for details. Additionally
+                            to the gzip compression levels the level 0 was added
+                            to specify that the payload should be distributed un-
+                            compressed.
         -h, --help          Display this usage information.
             --version       Show version and exit.
 
