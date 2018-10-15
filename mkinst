@@ -171,7 +171,7 @@ elif [ -d "$1" ]; then
     fi
 
     if [ "$include" = "" ]; then
-        include="echo tar xf \$tmp"
+        include="echo tar xopPf \$tmp"
     fi
 else
     log "Unable to read from source."
