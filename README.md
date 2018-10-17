@@ -4,20 +4,19 @@ This tool can be used to create self-contained installers.
 
 ## Usage
 
-    usage: mkinst [OPTIONS] [--] <source> <target>
+    usage: mkinst [OPTIONS] [--] <target> <source>
 
     Creates a self-contained installer from the specified source and stores it to
     the specified target.
 
     ARGUMENTS
 
+        <target>            Either a file-name or '-' for stdout.
         <source>            Expects a file-name, a directory name or '-' for stdin.
                             If the name of a directory is specified, the tool will
                             create a tar archive from it. If the source is no direc-
                             tory an additional custom installer script needs to be
                             added using the options '-i' or '--include'.
-
-        <target>            Either a file-name or '-' for stdout.
 
     OPTIONS
 
