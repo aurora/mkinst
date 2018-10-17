@@ -28,7 +28,7 @@ tempfiles=()
 function showusage {
     echo "usage: $(basename $0) [OPTIONS] [--] <target> <source> [<source> ...]
 
-Creates a self-contained installer from the specified source and stores it to
+Creates a self-contained installer from the specified sources and stores it to
 the specified target.
 
 ARGUMENTS
