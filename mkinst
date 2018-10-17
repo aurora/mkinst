@@ -163,7 +163,8 @@ tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 addtemp "$tmp"
 
 tail +$line "$0" \
-    | sed -e "s;%%SUM%%;${check[0]};g" \
+    | sed -e "s;%%VERSION%%;$version;g" \
+        -e "s;%%SUM%%;${check[0]};g" \
         -e "s;%%SIZE%%;${check[1]};g" \
         -e "s;%%SHELL%%;$instshell;g" \
     | cat - <($include) <(echo "exit") > "$tmp"
@@ -181,7 +182,7 @@ exit
 #MARKER:INSTALLER
 #!%%SHELL%%
 
-# Created using mkinst - https://github.com/aurora/mkinst/
+# Created using mkinst, v%%VERSION%% - https://github.com/aurora/mkinst/
 # This installation script is licensed unter the MIT, (c) 2018 by Harald Lapp.
 #
 # This does not apply to the software distributed with this script, which
