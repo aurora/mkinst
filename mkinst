@@ -101,7 +101,7 @@ while [[ "${1:0:1}" = "-" ]]; do
                 exit 1
             fi
 
-            include="cat "$include""
+            include="cat "$2""
             shift
             ;;
         -s|--shell)
