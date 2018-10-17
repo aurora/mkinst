@@ -26,7 +26,14 @@ This tool can be used to create self-contained installers.
                             gzip man pages for details.
         -h, --help          Display this usage information.
             --version       Show version and exit.
-        
+
+## Examples
+
+Please have a look at the following build scripts to see what's possible:
+
+* https://github.com/aurora/mkinst/blob/master/build.sh
+* https://github.com/aurora/caddy.sh/blob/master/build.sh
+
 ## License
 
 *Note: while this script is distributed under the GPL-3 license, the generated
