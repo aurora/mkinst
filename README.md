@@ -4,19 +4,15 @@ This tool can be used to create self-contained installers.
 
 ## Usage
 
-    usage: mkinst [OPTIONS] [--] <target> <source>
+    usage: mkinst [OPTIONS] [--] <target> <source> [<source> ...]
 
-    Creates a self-contained installer from the specified source and stores it to
+    Creates a self-contained installer from the specified sources and stores it to
     the specified target.
 
     ARGUMENTS
 
         <target>            Either a file-name or '-' for stdout.
-        <source>            Expects a file-name, a directory name or '-' for stdin.
-                            If the name of a directory is specified, the tool will
-                            create a tar archive from it. If the source is no direc-
-                            tory an additional custom installer script needs to be
-                            added using the options '-i' or '--include'.
+        <source>            One or multiple file or directory names.
 
     OPTIONS
 
@@ -25,17 +21,12 @@ This tool can be used to create self-contained installers.
                             Make sure that the shell is available on the target
                             system. The specified path should be valid to use as
                             shebang.
-        -i, --include ARG   Additional custom installer script to include. This
-                            option is required if the source is either a file or
-                            stdin. It is optional if the source is a directory.
-        -c, --compress ARG  Compression level (default: 6).
-                            Please see the gzip man pages for details. Additionally
-                            to the gzip compression levels the level 0 was added
-                            to specify that the payload should be distributed un-
-                            compressed.
+        -i, --include ARG   Additional custom installer script to include.
+        -c, --compress ARG  Compression level (default: 6). Please see the
+                            gzip man pages for details.
         -h, --help          Display this usage information.
             --version       Show version and exit.
-
+        
 ## License
 
 *Note: while this script is distributed under the GPL-3 license, the generated
