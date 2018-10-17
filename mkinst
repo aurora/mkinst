@@ -26,20 +26,19 @@ compress=6
 tempfiles=()
 
 function showusage {
-    echo "usage: $(basename $0) [OPTIONS] [--] <source> <target>
+    echo "usage: $(basename $0) [OPTIONS] [--] <target> <source>
 
 Creates a self-contained installer from the specified source and stores it to
 the specified target.
 
 ARGUMENTS
 
+    <target>            Either a file-name or '-' for stdout.
     <source>            Expects a file-name, a directory name or '-' for stdin.
                         If the name of a directory is specified, the tool will
                         create a tar archive from it. If the source is no direc-
                         tory an additional custom installer script needs to be
                         added using the options '-i' or '--include'.
-
-    <target>            Either a file-name or '-' for stdout.
 
 OPTIONS
 
@@ -128,13 +127,13 @@ if [ "$2" = "" ]; then
     exit 1
 fi
 
-if [ "$2" = "-" ]; then
+if [ "$1" = "-" ]; then
     dst=/dev/stdout
-elif [ -e "$2" ]; then
+elif [ -e "$1" ]; then
     log "Target already exists."
     exit 1
 else
-    dst="$2"
+    dst="$1"
 fi
 
 if [ "$include" != "" ]; then
@@ -146,7 +145,7 @@ if [ "$include" != "" ]; then
     include="cat "$include""
 fi
 
-if [ "$1" = "-" ] || [ -f "$1" ]; then
+if [ "$2" = "-" ] || [ -f "$2" ]; then
     if [ "$include" = "" ]; then
         showusage
         exit 1
@@ -156,18 +155,18 @@ if [ "$1" = "-" ] || [ -f "$1" ]; then
     addtemp "$src"
 
     if [[ $compress -gt 0 ]]; then
-        cat "$1" | gzip -$compress > "$src"
+        cat "$2" | gzip -$compress > "$src"
     else
-        cat "$1" > "$src"
+        cat "$2" > "$src"
     fi
-elif [ -d "$1" ]; then
+elif [ -d "$2" ]; then
     src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
     addtemp "$src"
 
     if [[ $compress -gt 0 ]]; then
-        tar cf - -C "$1" . | gzip -$compress > "$src"
+        tar cf - -C "$2" . | gzip -$compress > "$src"
     else
-        tar cf "$src" -C "$1" .
+        tar cf "$src" -C "$2" .
     fi
 
     if [ "$include" = "" ]; then
