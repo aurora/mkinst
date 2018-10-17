@@ -34,7 +34,7 @@ the specified target.
 ARGUMENTS
 
     <target>            Either a file-name or '-' for stdout.
-    <source>            One or multiple file or directory names.
+    <source>            A file or directory name to use as source.
 
 OPTIONS
 
