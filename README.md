@@ -1,6 +1,8 @@
 # mkinst
 
-This tool can be used to create self-contained installers.
+This tool can be used to create self-contained installers. While mkinst
+itself requires a bash, the created installer supplied with the installation
+package is POSIX compliant and should be usable with a POSIX compliant shell.
 
 ## Usage
 
