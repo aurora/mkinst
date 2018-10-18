@@ -19,14 +19,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 version="0.0.1"
-include="echo tar xzopPf \$tmp"
+include=""
 instshell="/bin/sh"
 verbose=true
 compress=6
+wrap=false
 tempfiles=()
 
 function showusage {
     echo "usage: $(basename $0) [OPTIONS] [--] <target> <source> [<source> ...]
+usage: $(basename $0) [OPTIONS] -w -i ARG [--] <target> <source>
 
 Creates a self-contained installer from the specified sources and stores it to
 the specified target.
@@ -79,6 +81,9 @@ while [[ "${1:0:1}" = "-" ]]; do
         --)
             shift
             break
+            ;;
+        -w|--wrap)
+            wrap=true
             ;;
         -q|--quiet)
             verbose=false
@@ -137,6 +142,21 @@ fi
 
 shift
 
+if [[ $wrap = true ]]; then
+    if [[ $# -ne 1 ]]; then
+        log "Wrap takes only one source argument."
+        exit 1
+    elif [ ! -f "$1" ]; then
+        log "Wrap takes a file as source."
+        exit 1
+    elif [ "$include" = "" ]; then
+        log "Custom include is required when wrapping a source."
+        exit 1
+    fi
+elif [ "$include" = "" ]; then
+    include="echo untar_payload \"/\" \"\$payload\""
+fi
+
 error=false
 
 for i in $@; do
@@ -151,10 +171,14 @@ if [[ $error = true ]]; then
     exit 1
 fi
 
-src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
-addtemp "$src"
+if [[ $wrap = true ]]; then
+    src="$1"
+else
+    src=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
+    addtemp "$src"
 
-tar cf - $@ | gzip -$compress > "$src"
+    tar cf - $@ | gzip -$compress > "$src"
+fi
 
 check=($(CMD_ENV=xpg4 cksum "$src"))
 line=$(($(grep -n "#""MARKER:INSTALLER" "$0" | head -n 1 | cut -d ":" -f 1) + 1))
@@ -169,9 +193,7 @@ tail +$line "$0" \
         -e "s;%%SHELL%%;$instshell;g" \
     | cat - <($include) <(echo "exit") > "$tmp"
 
-extract="tail +$(($(cat $tmp | wc -l) + 1)) \$0"
-
-sed -e "s;%%EXTRACT%%;$extract;g" "$tmp" | cat - "$src" > "$dst"
+sed -e "s;%%LINES%%;$(($(cat $tmp | wc -l) + 1));g" "$tmp" | cat - "$src" > "$dst"
 
 if [ -f "$dst" ]; then
     chmod a+x "$dst"
@@ -188,17 +210,22 @@ exit
 # This does not apply to the software distributed with this script, which
 # is property of its respective owner.
 #
-tmp=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
+check_payload() {
+    if [ $1 -ne %%SUM%% ] || [ $2 -ne %%SIZE%% ]; then
+        echo "The installer is corrupted." 1>&2
+        exit 1
+    fi
+}
 
-trap 'code=$? ; rm -f ${tmp} ; exit $code' EXIT HUP INT QUIT TERM
+untar_payload() {
+    tar xzmopP -C "$1" -f "$2"
+}
 
-%%EXTRACT%% > $tmp
+payload=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
 
-scheck=(%%SUM%% %%SIZE%%)
-pcheck=($(CMD_ENV=xpg4 cksum "$tmp"))
+trap 'code=$? ; rm -f "${payload}" ; exit $code' EXIT HUP INT QUIT TERM
 
-if [ ${scheck[0]} -ne ${pcheck[0]} ] || [ ${scheck[1]} -ne ${pcheck[1]} ]; then
-    echo "The installer is corrupted." 1>&2
-    exit 1
-fi
+tail -n +%%LINES%% "$0" > "$payload"
+
+check_payload $(CMD_ENV=xpg4 cksum "$payload")
 
