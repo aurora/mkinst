@@ -46,8 +46,13 @@ OPTIONS
                         system. The specified path should be valid to use as
                         shebang.
     -i, --include ARG   Additional custom installer script to include.
-    -c, --compress ARG  Compression level (default: $compress). Please see the
-                        gzip man pages for details.
+    -c, --compress ARG  Compression level 1-9 to use (default: $compress), whereat 1
+                        defines the fastest and 9 defines the best compression.
+    -w, --wrap          Wrap the specified source in an installer without using
+                        tar internally to create an installation package. Note
+                        that this argument requires a custom installer script
+                        as the installer can't know how to handle the wrapped
+                        payload. Also the compression is ignored.
     -h, --help          Display this usage information.
         --version       Show version and exit.
 "
