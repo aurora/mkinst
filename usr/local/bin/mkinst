@@ -154,7 +154,7 @@ if [[ $wrap = true ]]; then
         exit 1
     fi
 elif [ "$include" = "" ]; then
-    include="echo untar_payload \"/\" \"\$payload\""
+    include="echo untar_payload \"/\""
 fi
 
 error=false
@@ -218,7 +218,11 @@ check_payload() {
 }
 
 untar_payload() {
-    tar xzmopP -C "$1" -f "$2"
+    if [ "$1" = "" ]; then
+        tar xzmopPf "$payload"
+    else
+        tar xzmopP -C "$1" -f "$payload"
+    fi
 }
 
 payload=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
