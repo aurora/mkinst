@@ -210,6 +210,19 @@ exit
 # This does not apply to the software distributed with this script, which
 # is property of its respective owner.
 #
+payload=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
+tempfiles="$payload"
+
+add_temp() {
+    tempfiles="$tempfiles $1"
+}
+
+cleanup_temp() {
+    for tempfile in $tempfiles; do
+        rm -f "$tempfile"
+    done
+}
+
 check_payload() {
     if [ $1 -ne %%SUM%% ] || [ $2 -ne %%SIZE%% ]; then
         echo "The installer is corrupted." 1>&2
@@ -225,9 +238,7 @@ untar_payload() {
     fi
 }
 
-payload=$(mktemp 2>/dev/null || mktemp -t "tmp.XXXXXXXXXX")
-
-trap 'code=$? ; rm -f "${payload}" ; exit $code' EXIT HUP INT QUIT TERM
+trap 'code=$? ; cleanup ; exit $code' EXIT HUP INT QUIT TERM
 
 tail -n +%%LINES%% "$0" > "$payload"
 
