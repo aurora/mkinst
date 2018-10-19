@@ -49,9 +49,9 @@ the package. It's possible to extend the functionality of the created installer 
 the `-i` or `--include` argument for mkinst. The main part of the created installer is POSIX compliant and defines the
 following functions that can be called from the custom include script.
 
-*   **add_temp ARG1** -- Remember the specified filename (ARG1) as temporary file that needs to be removed when installer exits
-*   **cleanup_temp** -- Remove temporary files. Note that this function is registered as exit handler by the installer. So normally there should be no reason to call this function as it is automatically called when the installer exits.
-*   **untar_payload \[ARG1\]** -- This function contains the code to uncompress and install the payload. The argument is optional and defines the path to uncompress the payload in. By default the path is "/".
+*   **add_temp ARG1** -- Remember the specified filename (ARG1) as temporary file that needs to be removed when installer exits.
+*   **cleanup_temp** -- Remove temporary files. Note that this function is registered as exit handler by the installer. So normally there should be no reason to call this function directly as it is automatically called when the installer exits.
+*   **untar_payload \[ARG1\]** -- This function contains the code to uncompress and install the payload. The argument is optional and defines the path to uncompress the payload in. By default this path is "/".
 
 ## License
 
