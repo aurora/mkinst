@@ -14,6 +14,6 @@ if [ "\$EUID" -ne 0 ]; then
     exit 1
 fi 
 
-tar xzmopP -C / -f \$tmp
+untar_payload "/"
 INSTALLER
 ) dist/mkinst_installer.bin usr
