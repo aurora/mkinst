@@ -7,7 +7,8 @@ package is POSIX compliant and should be usable with a POSIX compliant shell.
 ## Usage
 
     usage: mkinst [OPTIONS] [--] <target> <source> [<source> ...]
-
+    usage: mkinst [OPTIONS] -w -i ARG [--] <target> <source>
+    
     Creates a self-contained installer from the specified sources and stores it to
     the specified target.
 
@@ -24,8 +25,13 @@ package is POSIX compliant and should be usable with a POSIX compliant shell.
                             system. The specified path should be valid to use as
                             shebang.
         -i, --include ARG   Additional custom installer script to include.
-        -c, --compress ARG  Compression level (default: 6). Please see the
-                            gzip man pages for details.
+        -c, --compress ARG  Compression level 1-9 to use (default: 6), whereat 1
+                            defines the fastest and 9 defines the best compression.
+        -w, --wrap          Wrap the specified source in an installer without using
+                            tar internally to create an installation package. Note
+                            that this argument requires a custom installer script
+                            as the installer can't know how to handle the wrapped
+                            payload. Also the compression is ignored.
         -h, --help          Display this usage information.
             --version       Show version and exit.
 
@@ -35,6 +41,17 @@ Please have a look at the following build scripts to see what's possible:
 
 * https://github.com/aurora/mkinst/blob/master/build.sh
 * https://github.com/aurora/caddy.sh/blob/master/build.sh
+
+## API
+
+By default mkinst will create a tar package from the specified sources and the created installer contains code to untar
+the package. It's possible to extend the functionality of the created installer by specifying a custom script using
+the `-i` or `--include` argument for mkinst. The main part of the created installer is POSIX compliant and defines the
+following functions that can be called from the custom include script.
+
+*   **add_temp ARG1** -- Remember the specified filename (ARG1) as temporary file that needs to be removed when installer exits
+*   **cleanup_temp** -- Remove temporary files. Note that this function is registered as exit handler by the installer. So normally there should be no reason to call this function as it is automatically called when the installer exits.
+*   **untar_payload \[ARG1\]** -- This function contains the code to uncompress and install the payload. The argument is optional and defines the path to uncompress the payload in. By default the path is "/".
 
 ## License
 
