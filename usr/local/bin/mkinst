@@ -243,7 +243,7 @@ untar_payload() {
     fi
 }
 
-trap 'code=$? ; cleanup ; exit $code' EXIT HUP INT QUIT TERM
+trap 'code=$? ; cleanup_temp ; exit $code' EXIT HUP INT QUIT TERM
 
 tail -n +%%LINES%% "$0" > "$payload"
 
