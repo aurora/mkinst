@@ -9,7 +9,7 @@
 rm -f dist/mkinst_installer.bin
 
 usr/local/bin/mkinst -i <(cat << INSTALLER
-if [ "\$EUID" -ne 0 ]; then
+if [ \$(id -u) -ne 0 ]; then
     echo "Please run as root."
     exit 1
 fi 
